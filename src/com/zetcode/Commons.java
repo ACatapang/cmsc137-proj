@@ -21,4 +21,12 @@ public interface Commons {
     int DELAY = 17;
     int PLAYER_WIDTH = 15;
     int PLAYER_HEIGHT = 10;
+
+    int MENU_STATE = 0;
+    int GAME_STATE = 1;
+    int GAME_OVER_STATE = 2;
+    int PAUSE_STATE = 3;
+
+    long MESSAGE_DISPLAY_TIME = 10000; // Message display duration in milliseconds
+    int MESSAGE_FADE_STEP = 20;
 }
