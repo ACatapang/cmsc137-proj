@@ -7,18 +7,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Menu extends JPanel {
 
-    private JPanel cardPanel;
-    private CardLayout cardLayout;
-
     public Menu(JPanel cardPanel, CardLayout cardLayout) {
-        this.cardPanel = cardPanel;
-        this.cardLayout = cardLayout;
-
         setPreferredSize(new Dimension(300, 200));
         setLayout(new GridBagLayout());
 
@@ -46,8 +39,7 @@ public class Menu extends JPanel {
 
         // Add action listeners to the buttons
         play_button.addActionListener((ActionEvent e) -> {
-            JOptionPane.showMessageDialog(Menu.this, "Play button clicked!");
-            // Handle play button click
+            cardLayout.show(cardPanel, "game");
         });
 
         exit_button.addActionListener((ActionEvent e) -> {

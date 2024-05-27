@@ -20,6 +20,9 @@ public class BluePaleDot extends JFrame {
         Menu menuPanel = new Menu(cardPanel, cardLayout);
         cardPanel.add(menuPanel, "menu");
 
+        Gameboard gamePanel = new Gameboard();
+        cardPanel.add(gamePanel, "game");
+
         Info infoPanel = new Info();
         cardPanel.add(infoPanel, "info");
 
