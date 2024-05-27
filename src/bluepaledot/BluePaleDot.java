@@ -23,7 +23,7 @@ public class BluePaleDot extends JFrame {
         Gameboard gamePanel = new Gameboard();
         cardPanel.add(gamePanel, "game");
 
-        Info infoPanel = new Info();
+        Info infoPanel = new Info(cardPanel, cardLayout);
         cardPanel.add(infoPanel, "info");
 
         setLayout(new BorderLayout());
