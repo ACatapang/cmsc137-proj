@@ -1,4 +1,4 @@
-package bluepaledot;
+package bluepaledot.game;
 
 import java.awt.CardLayout;
 import java.awt.Dimension;

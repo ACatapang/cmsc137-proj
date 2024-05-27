@@ -1,4 +1,4 @@
-package bluepaledot.sprites;
+package bluepaledot.game.sprites;
 
 import javax.swing.ImageIcon;
 
@@ -40,18 +40,18 @@ public class Enemy extends Sprite {
 
         public Bomb(int x, int y) {
 
-            initExplode(x, y);
+            initBomb(x, y);
         }
 
-        private void initExplode(int x, int y) {
+        private void initBomb(int x, int y) {
 
             setDestroyed(true);
 
             this.x = x;
             this.y = y;
 
-            var explodeImg = "src/images/explode.png";
-            var ii = new ImageIcon(explodeImg);
+            var bombImg = "src/images/bomb.png";
+            var ii = new ImageIcon(bombImg);
             setImage(ii.getImage());
         }
 

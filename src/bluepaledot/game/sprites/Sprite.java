@@ -1,4 +1,4 @@
-package bluepaledot.sprites;
+package bluepaledot.game.sprites;
 
 import java.awt.Image;
 

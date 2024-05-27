@@ -1,4 +1,4 @@
-package bluepaledot.sprites;
+package bluepaledot.game.sprites;
 
 import javax.swing.ImageIcon;
 
@@ -14,7 +14,7 @@ public class Bullet extends Sprite {
 
     private void initShot(int x, int y) {
 
-        var shotImg = "src/images/shot.png";
+        var shotImg = "src/images/bullet.png";
         var ii = new ImageIcon(shotImg);
         setImage(ii.getImage());
 

@@ -1,4 +1,4 @@
-package bluepaledot;
+package bluepaledot.game;
 
 public interface Constants {
 
@@ -10,7 +10,7 @@ public interface Constants {
     int BORDER_RIGHT = 30;
     int BORDER_LEFT = 5;
 
-    int GROUND = 290;
+    int GROUND = 450;
     int BOMB_HEIGHT = 5;
 
     int ENEMY_HEIGHT = 12;
@@ -19,7 +19,7 @@ public interface Constants {
     int ENEMY_INIT_Y = 5;
 
     int GO_DOWN = 15;
-    int NUMBER_OF_ENEMIES_TO_DESTROY = 24;
+    int NUMBER_OF_ENEMIES_TO_DESTROY = 40;
     int CHANCE = 5;
     int DELAY = 17;
     int PLAYER_WIDTH = 15;

@@ -1,26 +1,42 @@
-package bluepaledot;
+package bluepaledot.game;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.EventQueue;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+/**
+ *
+ * @author angel
+ */
 public class BluePaleDot extends JFrame {
+
+    private JPanel cardPanel;
+    private CardLayout cardLayout;
 
     public BluePaleDot() {
         initUI();
     }
 
     private void initUI() {
-        JPanel cardPanel = new JPanel();
-        CardLayout cardLayout = new CardLayout();
+        cardPanel = new JPanel();
+        cardLayout = new CardLayout();
         cardPanel.setLayout(cardLayout);
 
         Menu menuPanel = new Menu(cardPanel, cardLayout);
         cardPanel.add(menuPanel, "menu");
 
-        Gameboard gamePanel = new Gameboard();
+        // Add the Board panel
+        Board gamePanel = new Board();
+        gamePanel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                gamePanel.requestFocusInWindow();
+            }
+        });
         cardPanel.add(gamePanel, "game");
 
         Info infoPanel = new Info(cardPanel, cardLayout);

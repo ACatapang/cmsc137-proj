@@ -1,8 +1,8 @@
-package bluepaledot;
+package bluepaledot.game;
 
-import bluepaledot.sprites.Bullet;
-import bluepaledot.sprites.Enemy;
-import bluepaledot.sprites.Player;
+import bluepaledot.game.sprites.Bullet;
+import bluepaledot.game.sprites.Enemy;
+import bluepaledot.game.sprites.Player;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -20,7 +20,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class Gameboard extends JPanel {
+public class Board extends JPanel {
 
     private Dimension d;
     private List<Enemy> enemies;
@@ -31,12 +31,12 @@ public class Gameboard extends JPanel {
     private int deaths = 0;
 
     private boolean inGame = true;
-    private String explodeImg = "src/images/explosion.png";
+    private String explImg = "src/images/explosion.png";
     private String message = "Game Over";
 
     private Timer timer;
 
-    public Gameboard() {
+    public Board() {
 
         initBoard();
         gameInit();
@@ -59,12 +59,12 @@ public class Gameboard extends JPanel {
 
         enemies = new ArrayList<>();
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 6; j++) {
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 8; j++) {
 
-                var enemy = new Enemy(Constants.ENEMY_INIT_X + 18 * j,
-                        Constants.ENEMY_INIT_Y + 18 * i);
-                enemies.add(enemy);
+                var alien = new Enemy(Constants.ENEMY_INIT_X + 30 * j,
+                        Constants.ENEMY_INIT_Y + 25 * i);
+                enemies.add(alien);
             }
         }
 
@@ -74,16 +74,16 @@ public class Gameboard extends JPanel {
 
     private void drawAliens(Graphics g) {
 
-        for (Enemy enemy : enemies) {
+        for (Enemy alien : enemies) {
 
-            if (enemy.isVisible()) {
+            if (alien.isVisible()) {
 
-                g.drawImage(enemy.getImage(), enemy.getX(), enemy.getY(), this);
+                g.drawImage(alien.getImage(), alien.getX(), alien.getY(), this);
             }
 
-            if (enemy.isDying()) {
+            if (alien.isDying()) {
 
-                enemy.die();
+                alien.die();
             }
         }
     }
@@ -102,7 +102,7 @@ public class Gameboard extends JPanel {
         }
     }
 
-    private void drawBullet(Graphics g) {
+    private void drawShot(Graphics g) {
 
         if (bullet.isVisible()) {
 
@@ -143,7 +143,7 @@ public class Gameboard extends JPanel {
 
             drawAliens(g);
             drawPlayer(g);
-            drawBullet(g);
+            drawShot(g);
             drawBombing(g);
 
         } else {
@@ -164,9 +164,9 @@ public class Gameboard extends JPanel {
         g.fillRect(0, 0, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
 
         g.setColor(new Color(0, 32, 48));
-        g.fillRect(50, Constants.BOARD_WIDTH / 2 - 30, Constants.BOARD_WIDTH - 100, 50);
+        g.fillRect(50, Constants.BOARD_WIDTH / 2, Constants.BOARD_WIDTH - 100, 50);
         g.setColor(Color.white);
-        g.drawRect(50, Constants.BOARD_WIDTH / 2 - 30, Constants.BOARD_WIDTH - 100, 50);
+        g.drawRect(50, Constants.BOARD_WIDTH / 2, Constants.BOARD_WIDTH - 100, 50);
 
         var small = new Font("Helvetica", Font.BOLD, 14);
         var fontMetrics = this.getFontMetrics(small);
@@ -195,20 +195,20 @@ public class Gameboard extends JPanel {
             int bulletX = bullet.getX();
             int bulletY = bullet.getY();
 
-            for (Enemy enemy : enemies) {
+            for (Enemy alien : enemies) {
 
-                int enemyX = enemy.getX();
-                int enemyY = enemy.getY();
+                int alienX = alien.getX();
+                int alienY = alien.getY();
 
-                if (enemy.isVisible() && bullet.isVisible()) {
-                    if (bulletX >= (enemyX)
-                            && bulletX <= (enemyX + Constants.ENEMY_WIDTH)
-                            && bulletY >= (enemyY)
-                            && bulletY <= (enemyY + Constants.ENEMY_HEIGHT)) {
+                if (alien.isVisible() && bullet.isVisible()) {
+                    if (bulletX >= (alienX)
+                            && bulletX <= (alienX + Constants.ENEMY_WIDTH)
+                            && bulletY >= (alienY)
+                            && bulletY <= (alienY + Constants.ENEMY_HEIGHT)) {
 
-                        var ii = new ImageIcon(explodeImg);
-                        enemy.setImage(ii.getImage());
-                        enemy.setDying(true);
+                        var ii = new ImageIcon(explImg);
+                        alien.setImage(ii.getImage());
+                        alien.setDying(true);
                         deaths++;
                         bullet.die();
                     }
@@ -226,9 +226,9 @@ public class Gameboard extends JPanel {
         }
 
         // enemies
-        for (Enemy enemy : enemies) {
+        for (Enemy alien : enemies) {
 
-            int x = enemy.getX();
+            int x = alien.getX();
 
             if (x >= Constants.BOARD_WIDTH - Constants.BORDER_RIGHT && direction != -1) {
 
@@ -261,34 +261,34 @@ public class Gameboard extends JPanel {
 
         while (it.hasNext()) {
 
-            Enemy enemy = it.next();
+            Enemy alien = it.next();
 
-            if (enemy.isVisible()) {
+            if (alien.isVisible()) {
 
-                int y = enemy.getY();
+                int y = alien.getY();
 
                 if (y > Constants.GROUND - Constants.ENEMY_HEIGHT) {
                     inGame = false;
                     message = "Invasion!";
                 }
 
-                enemy.act(direction);
+                alien.act(direction);
             }
         }
 
         // bombs
         var generator = new Random();
 
-        for (Enemy enemy : enemies) {
+        for (Enemy alien : enemies) {
 
-            int bullet = generator.nextInt(15);
-            Enemy.Bomb bomb = enemy.getBomb();
+            int shot = generator.nextInt(15);
+            Enemy.Bomb bomb = alien.getBomb();
 
-            if (bullet == Constants.CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
+            if (shot == Constants.CHANCE && alien.isVisible() && bomb.isDestroyed()) {
 
                 bomb.setDestroyed(false);
-                bomb.setX(enemy.getX());
-                bomb.setY(enemy.getY());
+                bomb.setX(alien.getX());
+                bomb.setY(alien.getY());
             }
 
             int bombX = bomb.getX();
@@ -303,7 +303,7 @@ public class Gameboard extends JPanel {
                         && bombY >= (playerY)
                         && bombY <= (playerY + Constants.PLAYER_HEIGHT)) {
 
-                    var ii = new ImageIcon(explodeImg);
+                    var ii = new ImageIcon(explImg);
                     player.setImage(ii.getImage());
                     player.setDying(true);
                     bomb.setDestroyed(true);
