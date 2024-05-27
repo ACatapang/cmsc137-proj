@@ -1,4 +1,4 @@
-package gamecore;
+package bluepaledot;
 
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
