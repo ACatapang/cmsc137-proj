@@ -1,8 +1,8 @@
 package bluepaledot;
 
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -13,22 +13,18 @@ public class BluePaleDot extends JFrame {
     }
 
     private void initUI() {
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 1.0;
-        gbc.weighty = 1.0;
-        gbc.anchor = GridBagConstraints.CENTER;
+        JPanel cardPanel = new JPanel();
+        CardLayout cardLayout = new CardLayout();
+        cardPanel.setLayout(cardLayout);
 
-        JPanel mainPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints innerGbc = new GridBagConstraints();
-        innerGbc.gridx = 0;
-        innerGbc.gridy = 0;
-        innerGbc.anchor = GridBagConstraints.CENTER;
+        Menu menuPanel = new Menu(cardPanel, cardLayout);
+        cardPanel.add(menuPanel, "menu");
 
-        mainPanel.add(new Menu(), innerGbc);
-        add(mainPanel, gbc);
+        Info infoPanel = new Info();
+        cardPanel.add(infoPanel, "info");
+
+        setLayout(new BorderLayout());
+        add(cardPanel, BorderLayout.CENTER);
 
         setTitle("Blue Pale Dot");
         setSize(Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);

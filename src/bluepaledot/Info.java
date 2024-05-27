@@ -1,12 +1,17 @@
 package bluepaledot;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import javax.swing.JPanel;
 
 public class Info extends JPanel {
+
+    public Info() {
+        setPreferredSize(new Dimension(500, 500));
+    }
 
     @Override
     protected void paintComponent(Graphics g) {

@@ -1,6 +1,7 @@
 package bluepaledot;
 
 public interface Constants {
+
     public static final String APP_NAME = "Blue Pale Dot";
 
     // UI
@@ -8,7 +9,6 @@ public interface Constants {
     public static final int BOARD_HEIGHT = 500;
 
     // Game states
-
     public static final int GAME_START = 0;
     public static final int IN_PROGRESS = 1;
     public final int GAME_END = 2;
