@@ -13,6 +13,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -44,7 +46,6 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
     Thread t = new Thread(this);
     String name;
-    String pname;
     String server = "localhost";
     boolean connected = false;
     DatagramSocket socket = new DatagramSocket();
@@ -164,10 +165,20 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 doDrawing(g);
             }
         };
+
         gamePanel.setPreferredSize(new Dimension(Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT));
         gamePanel.setBackground(Color.black);
         gamePanel.setFocusable(true);
         gamePanel.addKeyListener(new TAdapter());
+
+        // Add mouse listener to the game panel
+        gamePanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                gamePanel.requestFocusInWindow(); // Set focus to the game panel
+            }
+        });
+
         add(gamePanel, BorderLayout.EAST);
 
         d = new Dimension(Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
@@ -357,11 +368,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
                 direction = -1;
 
-                Iterator<Enemy> i1 = enemies.iterator();
-
-                while (i1.hasNext()) {
-
-                    Enemy a2 = i1.next();
+                for (Enemy a2 : enemies) {
                     a2.setY(a2.getY() + Constants.GO_DOWN);
                 }
             }
