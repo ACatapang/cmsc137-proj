@@ -1,13 +1,8 @@
 package bluepaledot.game;
 
-import java.awt.CardLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import javax.swing.JButton;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class Menu extends JPanel {
 
@@ -15,9 +10,10 @@ public class Menu extends JPanel {
         setPreferredSize(new Dimension(300, 200));
         setLayout(new GridBagLayout());
 
-        JButton play_button = new JButton("Play");
-        JButton exit_button = new JButton("Exit");
-        JButton info_button = new JButton("Info");
+        JButton startButton = new JButton("Start Game");
+        JButton joinButton = new JButton("Join Game");
+        JButton exitButton = new JButton("Exit");
+        JButton infoButton = new JButton("Info");
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -26,30 +22,28 @@ public class Menu extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(10, 10, 10, 10);
 
-        // Add Play button
-        add(play_button, gbc);
-
-        // Add Exit button
+        add(startButton, gbc);
         gbc.gridy++;
-        add(exit_button, gbc);
-
-        // Add Info button
+        add(joinButton, gbc);
         gbc.gridy++;
-        add(info_button, gbc);
+        add(exitButton, gbc);
+        gbc.gridy++;
+        add(infoButton, gbc);
 
-        // Add action listeners to the buttons
-        play_button.addActionListener((ActionEvent e) -> {
-            cardLayout.show(cardPanel, "game");
+        startButton.addActionListener((ActionEvent e) -> {
+            cardLayout.show(cardPanel, "startGame");
         });
 
-        exit_button.addActionListener((ActionEvent e) -> {
+        joinButton.addActionListener((ActionEvent e) -> {
+            cardLayout.show(cardPanel, "joinGame");
+        });
+
+        exitButton.addActionListener((ActionEvent e) -> {
             System.exit(0);
-
         });
 
-        info_button.addActionListener((ActionEvent e) -> {
+        infoButton.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "info");
-
         });
     }
 }

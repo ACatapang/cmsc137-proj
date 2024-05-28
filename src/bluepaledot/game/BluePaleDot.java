@@ -3,15 +3,9 @@ package bluepaledot.game;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.EventQueue;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-/**
- *
- * @author angel
- */
 public class BluePaleDot extends JFrame {
 
     private JPanel cardPanel;
@@ -29,15 +23,11 @@ public class BluePaleDot extends JFrame {
         Menu menuPanel = new Menu(cardPanel, cardLayout);
         cardPanel.add(menuPanel, "menu");
 
-        // Add the Board panel
-        Board gamePanel = new Board();
-        gamePanel.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentShown(ComponentEvent e) {
-                gamePanel.requestFocusInWindow();
-            }
-        });
-        cardPanel.add(gamePanel, "game");
+        StartGameMenu startGamePanel = new StartGameMenu(cardPanel, cardLayout);
+        cardPanel.add(startGamePanel, "startGame");
+
+        JoinGameMenu joinGamePanel = new JoinGameMenu(cardPanel, cardLayout);
+        cardPanel.add(joinGamePanel, "joinGame");
 
         Info infoPanel = new Info(cardPanel, cardLayout);
         cardPanel.add(infoPanel, "info");

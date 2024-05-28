@@ -12,6 +12,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -20,7 +24,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class Board extends JPanel {
+public class Board extends JPanel implements Runnable, Constants {
 
     private Dimension d;
     private List<Enemy> enemies;
@@ -36,10 +40,89 @@ public class Board extends JPanel {
 
     private Timer timer;
 
-    public Board() {
+    Thread t = new Thread(this);
+    String name = "Doe";
+    String pname;
+    String server = "localhost";
+    boolean connected = false;
+    DatagramSocket socket = new DatagramSocket();
+    String serverData;
+    BufferedImage offscreen;
+
+    public Board(String server, String name) throws Exception {
+        this.server = server;
+        this.name = name;
+
+        socket.setSoTimeout(100);
+
+        //create the buffer
+        offscreen = (BufferedImage) this.createImage(BOARD_WIDTH, BOARD_HEIGHT);
 
         initBoard();
-        gameInit();
+
+        t.start();
+    }
+
+    public void send(String msg) {
+        try {
+            byte[] buf = msg.getBytes();
+            InetAddress address = InetAddress.getByName(server);
+            DatagramPacket packet = new DatagramPacket(buf, buf.length, address, PORT);
+            socket.send(packet);
+        } catch (Exception e) {
+        }
+
+    }
+
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(1);
+            } catch (Exception ioe) {
+            }
+
+            //Get the data from players
+            byte[] buf = new byte[256];
+            DatagramPacket packet = new DatagramPacket(buf, buf.length);
+            try {
+                socket.receive(packet);
+            } catch (Exception ioe) {/*lazy exception handling :)*/
+            }
+
+            serverData = new String(buf);
+            serverData = serverData.trim();
+
+            //if (!serverData.equals("")){
+            //	System.out.println("Server Data:" +serverData);
+            //}
+            //Study the following kids. 
+            if (!connected && serverData.startsWith("CONNECTED")) {
+                connected = true;
+                System.out.println("Connected.");
+            } else if (!connected) {
+                System.out.println("Connecting..");
+                send("CONNECT " + name);
+            } else if (connected) {
+                if (offscreen != null) {
+                    offscreen.getGraphics().clearRect(0, 0, 640, 480);
+                    if (serverData.startsWith("PLAYER")) {
+                        String[] playersInfo = serverData.split(":");
+                        for (int i = 0; i < playersInfo.length; i++) {
+                            String[] playerInfo = playersInfo[i].split(" ");
+                            String pname = playerInfo[1];
+                            int x = Integer.parseInt(playerInfo[2]);
+                            int y = Integer.parseInt(playerInfo[3]);
+                            //draw on the offscreen image
+                            offscreen.getGraphics().fillOval(x, y, 20, 20);
+                            offscreen.getGraphics().drawString(pname, x - 10, y + 30);
+                        }
+                        //show the changes
+                        repaint();
+                    }
+                }
+
+            }
+        }
     }
 
     private void initBoard() {
