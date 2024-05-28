@@ -11,9 +11,11 @@ public class ChatPanel extends JPanel {
     private JTextField chatInput;
     private JButton sendButton;
     private GameClient gameClient;
+    private String pname;
 
-    public ChatPanel(GameClient gameClient) {
+    public ChatPanel(GameClient gameClient, String pname) {
         this.gameClient = gameClient;
+        this.pname = pname;
         initChatPanel();
     }
 
@@ -49,7 +51,7 @@ public class ChatPanel extends JPanel {
     private void sendMessage() {
         String message = chatInput.getText().trim();
         if (!message.isEmpty()) {
-            gameClient.send("CHAT " + gameClient.getName() + ": " + message);
+            gameClient.sendChatMessage(message); // Use the player's name when sending chat message
             chatInput.setText("");
         }
     }

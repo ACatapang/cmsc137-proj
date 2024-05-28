@@ -154,7 +154,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
     private void initBoard() {
         setLayout(new BorderLayout()); // Use BorderLayout
-        chatPanel = new ChatPanel(this); // Initialize ChatPanel
+        chatPanel = new ChatPanel(this, name); // Initialize ChatPanel
         add(chatPanel, BorderLayout.WEST); // Add ChatPanel to the left
 
         JPanel gamePanel = new JPanel() {
