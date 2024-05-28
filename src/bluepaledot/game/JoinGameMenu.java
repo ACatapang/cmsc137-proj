@@ -8,8 +8,14 @@ public class JoinGameMenu extends JPanel {
 
     private JTextField ipField;
     private JTextField nameField;
+    private JPanel cardPanel;
+    private CardLayout cardLayout;
 
+    
     public JoinGameMenu(JPanel cardPanel, CardLayout cardLayout) {
+        this.cardPanel = cardPanel;
+        this.cardLayout = cardLayout;
+
         setPreferredSize(new Dimension(300, 200));
         setLayout(new GridBagLayout());
 
@@ -44,9 +50,14 @@ public class JoinGameMenu extends JPanel {
             String ipAddress = ipField.getText();
 
             try {
-                new Board(ipAddress, name);
-            } catch (Exception ex) {
+                // Create Board instance
+                Board board = new Board(ipAddress, name);
 
+                // Add Board to cardPanel and switch to it
+                cardPanel.add(board, "Board");
+                cardLayout.show(cardPanel, "Board");
+            } catch (Exception ex) {
+                ex.printStackTrace(); // Handle exception properly
             }
         });
     }

@@ -242,22 +242,22 @@ public class Board extends JPanel implements Runnable, Constants {
     }
 
     private void gameOver(Graphics g) {
-
         g.setColor(Color.black);
         g.fillRect(0, 0, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
 
         g.setColor(new Color(0, 32, 48));
-        g.fillRect(50, Constants.BOARD_WIDTH / 2, Constants.BOARD_WIDTH - 100, 50);
+        g.fillRect(50, Constants.BOARD_HEIGHT / 2 - 25, Constants.BOARD_WIDTH - 100, 50);
         g.setColor(Color.white);
-        g.drawRect(50, Constants.BOARD_WIDTH / 2, Constants.BOARD_WIDTH - 100, 50);
+        g.drawRect(50, Constants.BOARD_HEIGHT / 2 - 25, Constants.BOARD_WIDTH - 100, 50);
 
         var small = new Font("Helvetica", Font.BOLD, 14);
         var fontMetrics = this.getFontMetrics(small);
 
         g.setColor(Color.white);
         g.setFont(small);
-        g.drawString(message, (Constants.BOARD_WIDTH - fontMetrics.stringWidth(message)) / 2,
-                Constants.BOARD_WIDTH / 2);
+        int messageWidth = fontMetrics.stringWidth(message);
+        int messageHeight = fontMetrics.getAscent();
+        g.drawString(message, (Constants.BOARD_WIDTH - messageWidth) / 2, (Constants.BOARD_HEIGHT - messageHeight) / 2);
     }
 
     private void update() {
