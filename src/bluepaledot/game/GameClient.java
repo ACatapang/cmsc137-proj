@@ -3,6 +3,7 @@ package bluepaledot.game;
 import bluepaledot.game.sprites.Bullet;
 import bluepaledot.game.sprites.Enemy;
 import bluepaledot.game.sprites.Player;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -37,6 +38,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
     private boolean inGame = true;
     private String explImg = "src/images/explosion.png";
     private String message = "Game Over";
+    ChatPanel chatPanel;
 
     private Timer timer;
 
@@ -72,6 +74,10 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
     }
 
+    public void sendChatMessage(String message) {
+        send("CHAT " + name + ": " + message);
+    }
+
     public void run() {
         while (true) {
             try {
@@ -101,6 +107,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 System.out.println("Connecting..");
                 send("CONNECT " + name);
             } else if (connected) {
+
                 if (serverData.startsWith("PLAYER")) {
                     String[] playersInfo = serverData.split(":");
                     for (int i = 0; i < playersInfo.length; i++) {
@@ -114,6 +121,16 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
                     }
                     //show the changes
+                    repaint();
+                }
+
+                if (serverData.startsWith("CHAT")) {
+                    // Tokenize chat message
+                    String[] tokens = serverData.split(" ", 2);
+                    String message = tokens[1];
+                    // Display chat message in chat panel
+                    chatPanel.addMessage(message);
+
                     repaint();
                 }
             }
@@ -136,11 +153,24 @@ public class GameClient extends JPanel implements Runnable, Constants {
     }
 
     private void initBoard() {
+        setLayout(new BorderLayout()); // Use BorderLayout
+        chatPanel = new ChatPanel(this); // Initialize ChatPanel
+        add(chatPanel, BorderLayout.WEST); // Add ChatPanel to the left
 
-        addKeyListener(new TAdapter());
-        setFocusable(true);
+        JPanel gamePanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                doDrawing(g);
+            }
+        };
+        gamePanel.setPreferredSize(new Dimension(Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT));
+        gamePanel.setBackground(Color.black);
+        gamePanel.setFocusable(true);
+        gamePanel.addKeyListener(new TAdapter());
+        add(gamePanel, BorderLayout.EAST);
+
         d = new Dimension(Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
-        setBackground(Color.black);
 
         timer = new Timer(Constants.DELAY, new GameCycle());
         timer.start();
@@ -234,6 +264,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 }
             }
 
+            drawEnemies(g);
             drawShot(g);
             drawBombing(g);
 
@@ -433,30 +464,30 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
         @Override
         public void keyReleased(KeyEvent e) {
-
-            player.keyReleased(e);
+            if (e.getComponent() instanceof JPanel) {
+                player.keyReleased(e);
+            }
         }
 
         @Override
         public void keyPressed(KeyEvent e) {
+            if (e.getComponent() instanceof JPanel) {
+                player.keyPressed(e);
 
-            player.keyPressed(e);
+                int x = player.getX();
+                int y = player.getY();
 
-            int x = player.getX();
-            int y = player.getY();
+                send("PLAYER " + name + " " + x + " " + y);
 
-            send("PLAYER " + name + " " + x + " " + y);
+                int key = e.getKeyCode();
 
-            int key = e.getKeyCode();
-
-            if (key == KeyEvent.VK_SPACE) {
-
-                if (inGame) {
-
-                    if (!bullet.isVisible()) {
-
-                        bullet = new Bullet(x, y);
+                if (key == KeyEvent.VK_SPACE) {
+                    if (inGame) {
+                        if (!bullet.isVisible()) {
+                            bullet = new Bullet(x, y);
+                        }
                     }
+
                 }
             }
 

@@ -36,7 +36,7 @@ public class BluePaleDot extends JFrame {
         add(cardPanel, BorderLayout.CENTER);
 
         setTitle("Blue Pale Dot");
-        setSize(Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
+        setSize(900, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
         setLocationRelativeTo(null);

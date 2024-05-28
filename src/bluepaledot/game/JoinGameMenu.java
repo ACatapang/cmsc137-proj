@@ -50,6 +50,10 @@ public class JoinGameMenu extends JPanel {
             String name = nameField.getText();
             String ipAddress = ipField.getText();
 
+            TextPanel waitGame = new TextPanel();
+            cardPanel.add(waitGame, "waitGame");
+            // cardLayout.show(cardPanel, "waitGame");
+
             try {
                 // Create gameClient instance
                 GameClient gameClient = new GameClient(ipAddress, name);

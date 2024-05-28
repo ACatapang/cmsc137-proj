@@ -3,11 +3,11 @@ package bluepaledot.game;
 import java.awt.*;
 import javax.swing.*;
 
-public class ServerPanel extends JPanel {
+public class TextPanel extends JPanel {
 
     private JLabel logLabel;
 
-    public ServerPanel() {
+    public TextPanel() {
         setLayout(new GridBagLayout());
 
         // Centered log message

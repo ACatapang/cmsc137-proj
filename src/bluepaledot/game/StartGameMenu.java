@@ -44,7 +44,7 @@ public class StartGameMenu extends JPanel {
             int playerCount = Integer.parseInt(playerCountField.getText());
 
             // Create the ServerPanel and pass it to GameServer
-            ServerPanel serverPanel = new ServerPanel();
+            TextPanel serverPanel = new TextPanel();
             cardPanel.add(serverPanel, "ServerPanel");
             cardLayout.show(cardPanel, "ServerPanel");
 

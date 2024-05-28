@@ -14,9 +14,9 @@ public class GameServer implements Runnable, Constants {
     int gameStage = WAITING_FOR_PLAYERS;
     int numPlayers;
     Thread t = new Thread(this);
-    private ServerPanel serverPanel;
+    private TextPanel serverPanel;
 
-    public GameServer(int numPlayers, ServerPanel serverPanel) {
+    public GameServer(int numPlayers, TextPanel serverPanel) {
         this.numPlayers = numPlayers;
         this.serverPanel = serverPanel;
         try {
@@ -91,6 +91,13 @@ public class GameServer implements Runnable, Constants {
                     break;
                 case IN_PROGRESS:
                     //Player data was received!
+                    if (playerData.startsWith("CHAT")) {
+                        // Tokenize chat message
+                        String[] tokens = playerData.split(" ", 2);
+                        String message = tokens[1];
+                        // Broadcast chat message to all players
+                        broadcast("CHAT " + message);
+                    }
                     if (playerData.startsWith("PLAYER")) {
                         //Tokenize:
                         //The format: PLAYER <player name> <x> <y>
