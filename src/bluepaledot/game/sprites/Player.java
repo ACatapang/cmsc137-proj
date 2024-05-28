@@ -6,9 +6,12 @@ import javax.swing.ImageIcon;
 
 public class Player extends Sprite {
 
+    private String name; // Add a field for the player's name
     private int width;
 
-    public Player() {
+    // Update the constructor to accept a name parameter
+    public Player(String name) {
+        this.name = name;
         initPlayer();
     }
 
@@ -26,9 +29,12 @@ public class Player extends Sprite {
         setY(START_Y);
     }
 
+    // Add a getter method for the player's name
+    public String getName() {
+        return name;
+    }
+
     public void act() {
-        // System.out.println("Player dx value: " + dx);
-        // System.out.println("Player x position before act: " + x);
         x += dx;
 
         if (x <= 2) {
@@ -38,7 +44,6 @@ public class Player extends Sprite {
         if (x >= Constants.BOARD_WIDTH - 2 * width) {
             x = Constants.BOARD_WIDTH - 2 * width;
         }
-        // System.out.println("Player x position after act: " + x);
     }
 
     public void keyPressed(KeyEvent e) {
@@ -46,12 +51,10 @@ public class Player extends Sprite {
 
         if (key == KeyEvent.VK_LEFT) {
             dx = -2;
-            // System.out.println("Left key pressed, dx set to " + dx);
         }
 
         if (key == KeyEvent.VK_RIGHT) {
             dx = 2;
-            // System.out.println("Right key pressed, dx set to " + dx);
         }
     }
 
@@ -60,7 +63,6 @@ public class Player extends Sprite {
 
         if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT) {
             dx = 0;
-            // System.out.println("Key released, dx set to " + dx);
         }
     }
 }

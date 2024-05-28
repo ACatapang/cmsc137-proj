@@ -2,6 +2,8 @@ package bluepaledot.game;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import javax.swing.*;
 
 public class JoinGameMenu extends JPanel {
@@ -11,7 +13,6 @@ public class JoinGameMenu extends JPanel {
     private JPanel cardPanel;
     private CardLayout cardLayout;
 
-    
     public JoinGameMenu(JPanel cardPanel, CardLayout cardLayout) {
         this.cardPanel = cardPanel;
         this.cardLayout = cardLayout;
@@ -50,12 +51,18 @@ public class JoinGameMenu extends JPanel {
             String ipAddress = ipField.getText();
 
             try {
-                // Create Board instance
-                Board board = new Board(ipAddress, name);
+                // Create gameClient instance
+                GameClient gameClient = new GameClient(ipAddress, name);
+                gameClient.addComponentListener(new ComponentAdapter() {
+                    @Override
+                    public void componentShown(ComponentEvent e) {
+                        gameClient.requestFocusInWindow();
+                    }
+                });
+                // Add gameClient to cardPanel and switch to it
+                cardPanel.add(gameClient, "gameClient");
+                cardLayout.show(cardPanel, "gameClient");
 
-                // Add Board to cardPanel and switch to it
-                cardPanel.add(board, "Board");
-                cardLayout.show(cardPanel, "Board");
             } catch (Exception ex) {
                 ex.printStackTrace(); // Handle exception properly
             }

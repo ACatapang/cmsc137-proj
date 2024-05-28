@@ -12,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -24,10 +23,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class Board extends JPanel implements Runnable, Constants {
+public class GameClient extends JPanel implements Runnable, Constants {
 
     private Dimension d;
     private List<Enemy> enemies;
+    private List<Player> players; // List of players
     private Player player;
     private Bullet bullet;
 
@@ -41,23 +41,21 @@ public class Board extends JPanel implements Runnable, Constants {
     private Timer timer;
 
     Thread t = new Thread(this);
-    String name = "Doe";
+    String name;
     String pname;
     String server = "localhost";
     boolean connected = false;
     DatagramSocket socket = new DatagramSocket();
     String serverData;
-    BufferedImage offscreen;
 
-    public Board(String server, String name) throws Exception {
+    public GameClient(String server, String name) throws Exception {
         this.server = server;
         this.name = name;
 
         socket.setSoTimeout(100);
 
         //create the buffer
-        offscreen = (BufferedImage) this.createImage(BOARD_WIDTH, BOARD_HEIGHT);
-
+        // offscreen = (BufferedImage) this.createImage(BOARD_WIDTH, BOARD_HEIGHT);
         initBoard();
 
         t.start();
@@ -103,26 +101,38 @@ public class Board extends JPanel implements Runnable, Constants {
                 System.out.println("Connecting..");
                 send("CONNECT " + name);
             } else if (connected) {
-                if (offscreen != null) {
-                    offscreen.getGraphics().clearRect(0, 0, 640, 480);
-                    if (serverData.startsWith("PLAYER")) {
-                        String[] playersInfo = serverData.split(":");
-                        for (int i = 0; i < playersInfo.length; i++) {
-                            String[] playerInfo = playersInfo[i].split(" ");
-                            String pname = playerInfo[1];
-                            int x = Integer.parseInt(playerInfo[2]);
-                            int y = Integer.parseInt(playerInfo[3]);
-                            //draw on the offscreen image
-                            offscreen.getGraphics().fillOval(x, y, 20, 20);
-                            offscreen.getGraphics().drawString(pname, x - 10, y + 30);
-                        }
-                        //show the changes
-                        repaint();
-                    }
-                }
+                if (serverData.startsWith("PLAYER")) {
+                    String[] playersInfo = serverData.split(":");
+                    for (int i = 0; i < playersInfo.length; i++) {
+                        String[] playerInfo = playersInfo[i].split(" ");
+                        String pname = playerInfo[1];
+                        int x = Integer.parseInt(playerInfo[2]);
+                        int y = Integer.parseInt(playerInfo[3]);
+                        // player.setX(x);
+                        // player.setY(y);
+                        updatePlayerPosition(pname, x, y);
 
+                    }
+                    //show the changes
+                    repaint();
+                }
             }
         }
+    }
+
+    private void updatePlayerPosition(String pname, int x, int y) {
+        // Find the player with pname in the list of players
+        for (Player player : players) {
+            if (player.getName().equals(pname)) {
+                // Update the player's position
+                player.setX(x);
+                player.setY(y);
+                return;
+            }
+        }
+        // If player not found, create a new player object and add it to the list
+        Player newPlayer = new Player(pname);
+        players.add(newPlayer);
     }
 
     private void initBoard() {
@@ -140,48 +150,42 @@ public class Board extends JPanel implements Runnable, Constants {
 
     private void gameInit() {
 
+        players = new ArrayList<>();
         enemies = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 8; j++) {
 
-                var alien = new Enemy(Constants.ENEMY_INIT_X + 30 * j,
+                var enemy = new Enemy(Constants.ENEMY_INIT_X + 30 * j,
                         Constants.ENEMY_INIT_Y + 25 * i);
-                enemies.add(alien);
+                enemies.add(enemy);
             }
         }
 
-        player = new Player();
+        player = new Player(name);
+        players.add(player);
         bullet = new Bullet();
     }
 
-    private void drawAliens(Graphics g) {
+    private void drawEnemies(Graphics g) {
 
-        for (Enemy alien : enemies) {
+        for (Enemy enemy : enemies) {
 
-            if (alien.isVisible()) {
+            if (enemy.isVisible()) {
 
-                g.drawImage(alien.getImage(), alien.getX(), alien.getY(), this);
+                g.drawImage(enemy.getImage(), enemy.getX(), enemy.getY(), this);
             }
 
-            if (alien.isDying()) {
+            if (enemy.isDying()) {
 
-                alien.die();
+                enemy.die();
             }
         }
     }
 
-    private void drawPlayer(Graphics g) {
-
+    private void drawPlayer(Graphics g, Player player) {
         if (player.isVisible()) {
-
             g.drawImage(player.getImage(), player.getX(), player.getY(), this);
-        }
-
-        if (player.isDying()) {
-
-            player.die();
-            inGame = false;
         }
     }
 
@@ -224,8 +228,12 @@ public class Board extends JPanel implements Runnable, Constants {
             g.drawLine(0, Constants.GROUND,
                     Constants.BOARD_WIDTH, Constants.GROUND);
 
-            drawAliens(g);
-            drawPlayer(g);
+            if (!players.isEmpty()) {
+                for (Player player : players) {
+                    drawPlayer(g, player);
+                }
+            }
+
             drawShot(g);
             drawBombing(g);
 
@@ -271,6 +279,7 @@ public class Board extends JPanel implements Runnable, Constants {
 
         // player
         player.act();
+        send("PLAYER " + name + " " + player.getX() + " " + player.getY());
 
         // bullet
         if (bullet.isVisible()) {
@@ -278,20 +287,20 @@ public class Board extends JPanel implements Runnable, Constants {
             int bulletX = bullet.getX();
             int bulletY = bullet.getY();
 
-            for (Enemy alien : enemies) {
+            for (Enemy enemy : enemies) {
 
-                int alienX = alien.getX();
-                int alienY = alien.getY();
+                int alienX = enemy.getX();
+                int alienY = enemy.getY();
 
-                if (alien.isVisible() && bullet.isVisible()) {
+                if (enemy.isVisible() && bullet.isVisible()) {
                     if (bulletX >= (alienX)
                             && bulletX <= (alienX + Constants.ENEMY_WIDTH)
                             && bulletY >= (alienY)
                             && bulletY <= (alienY + Constants.ENEMY_HEIGHT)) {
 
                         var ii = new ImageIcon(explImg);
-                        alien.setImage(ii.getImage());
-                        alien.setDying(true);
+                        enemy.setImage(ii.getImage());
+                        enemy.setDying(true);
                         deaths++;
                         bullet.die();
                     }
@@ -309,9 +318,9 @@ public class Board extends JPanel implements Runnable, Constants {
         }
 
         // enemies
-        for (Enemy alien : enemies) {
+        for (Enemy enemy : enemies) {
 
-            int x = alien.getX();
+            int x = enemy.getX();
 
             if (x >= Constants.BOARD_WIDTH - Constants.BORDER_RIGHT && direction != -1) {
 
@@ -344,34 +353,34 @@ public class Board extends JPanel implements Runnable, Constants {
 
         while (it.hasNext()) {
 
-            Enemy alien = it.next();
+            Enemy enemy = it.next();
 
-            if (alien.isVisible()) {
+            if (enemy.isVisible()) {
 
-                int y = alien.getY();
+                int y = enemy.getY();
 
                 if (y > Constants.GROUND - Constants.ENEMY_HEIGHT) {
                     inGame = false;
                     message = "Invasion!";
                 }
 
-                alien.act(direction);
+                enemy.act(direction);
             }
         }
 
         // bombs
         var generator = new Random();
 
-        for (Enemy alien : enemies) {
+        for (Enemy enemy : enemies) {
 
             int shot = generator.nextInt(15);
-            Enemy.Bomb bomb = alien.getBomb();
+            Enemy.Bomb bomb = enemy.getBomb();
 
-            if (shot == Constants.CHANCE && alien.isVisible() && bomb.isDestroyed()) {
+            if (shot == Constants.CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
 
                 bomb.setDestroyed(false);
-                bomb.setX(alien.getX());
-                bomb.setY(alien.getY());
+                bomb.setX(enemy.getX());
+                bomb.setY(enemy.getY());
             }
 
             int bombX = bomb.getX();
@@ -436,6 +445,8 @@ public class Board extends JPanel implements Runnable, Constants {
             int x = player.getX();
             int y = player.getY();
 
+            send("PLAYER " + name + " " + x + " " + y);
+
             int key = e.getKeyCode();
 
             if (key == KeyEvent.VK_SPACE) {
@@ -448,6 +459,7 @@ public class Board extends JPanel implements Runnable, Constants {
                     }
                 }
             }
+
         }
     }
 }

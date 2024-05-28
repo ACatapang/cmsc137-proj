@@ -43,6 +43,9 @@ public class NetPlayer {
         this.y = y;
     }
 
+    /**
+     * String representation. used for transfer over the network
+     */
     public String toString() {
         String retval = "";
         retval += "PLAYER ";

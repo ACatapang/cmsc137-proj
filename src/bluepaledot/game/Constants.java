@@ -14,7 +14,7 @@ public interface Constants {
     int BOMB_HEIGHT = 5;
 
     int ENEMY_HEIGHT = 12;
-    int ENEMY_WIDTH = 12;
+    int ENEMY_WIDTH = 20;
     int ENEMY_INIT_X = 150;
     int ENEMY_INIT_Y = 5;
 
@@ -22,7 +22,7 @@ public interface Constants {
     int NUMBER_OF_ENEMIES_TO_DESTROY = 40;
     int CHANCE = 5;
     int DELAY = 17;
-    int PLAYER_WIDTH = 15;
+    int PLAYER_WIDTH = 20;
     int PLAYER_HEIGHT = 10;
 
     // Game states

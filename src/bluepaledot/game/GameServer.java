@@ -90,15 +90,21 @@ public class GameServer implements Runnable, Constants {
                     gameStage = IN_PROGRESS;
                     break;
                 case IN_PROGRESS:
+                    //Player data was received!
                     if (playerData.startsWith("PLAYER")) {
+                        //Tokenize:
+                        //The format: PLAYER <player name> <x> <y>
                         String[] playerInfo = playerData.split(" ");
                         String pname = playerInfo[1];
                         int x = Integer.parseInt(playerInfo[2].trim());
                         int y = Integer.parseInt(playerInfo[3].trim());
+                        //Get the player from the game state
                         NetPlayer player = (NetPlayer) game.getPlayers().get(pname);
                         player.setX(x);
                         player.setY(y);
+                        //Update the game state
                         game.update(pname, player);
+                        //Send to all the updated game state
                         broadcast(game.toString());
                     }
                     break;
