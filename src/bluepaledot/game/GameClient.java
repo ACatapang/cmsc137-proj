@@ -110,6 +110,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
             } else if (connected) {
 
                 if (serverData.startsWith("PLAYER")) {
+                    // System.out.println(serverData);
                     String[] playersInfo = serverData.split(":");
                     for (int i = 0; i < playersInfo.length; i++) {
                         String[] playerInfo = playersInfo[i].split(" ");
@@ -490,7 +491,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
                 if (key == KeyEvent.VK_SPACE) {
                     if (inGame) {
-                        if (!bullet.isVisible()) {
+                        if (!bullet.isVisible()&&player.isVisible()) {
                             bullet = new Bullet(x, y);
                         }
                     }
