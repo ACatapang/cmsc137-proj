@@ -40,6 +40,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
     private boolean inGame = true;
     private boolean gameStart = false;
+    private boolean gamePaused = false;
     private String explImg = "src/images/explosion.png";
     private String message = "Game Over";
     ChatPanel chatPanel;
@@ -52,7 +53,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
     boolean connected = false;
     DatagramSocket socket = new DatagramSocket();
     String serverData;
-
+            
     public GameClient(String server, String name) throws Exception {
         this.server = server;
         this.name = name;
@@ -153,6 +154,14 @@ public class GameClient extends JPanel implements Runnable, Constants {
                     repaint();
                 }
 
+                if (serverData.startsWith("PAUSE")) {
+                    // Pause the game
+                    pauseGame();
+                } else if (serverData.startsWith("RESUME")) {
+                    // Resume the game
+                    resumeGame();
+                }
+
                 // if (serverData.startsWith("ENEMY")) {
                 // System.out.println(serverData);
                 // String[] enemyState = serverData.split(" ");
@@ -164,6 +173,14 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 // }
             }
         }
+    }
+
+    public void pauseGame() {
+        gamePaused = true;
+    }
+
+    public void resumeGame() {
+        gamePaused = false;
     }
 
     private void updatePlayerPosition(String pname, int x, int y, boolean dying) {
@@ -537,6 +554,19 @@ public class GameClient extends JPanel implements Runnable, Constants {
                         }
                     }
 
+                }else if (key == KeyEvent.VK_P) { // Check for "P" key press
+                // Toggle between pause and resume
+                if (inGame && gameStart) {
+                    if (gamePaused) {
+                        // Resume the game
+                        send("RESUME");
+                        resumeGame();
+                    } else {
+                        // Pause the game
+                        send("PAUSE");
+                        pauseGame();
+                    }
+                }
                 }
             }
 

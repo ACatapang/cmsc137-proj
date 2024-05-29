@@ -15,6 +15,8 @@ public class GameServer implements Runnable, Constants {
     int numPlayers;
     Thread t = new Thread(this);
     private TextPanel serverPanel;
+    private boolean paused = false;
+    
 
     public GameServer(int numPlayers, TextPanel serverPanel) {
         this.numPlayers = numPlayers;
@@ -36,6 +38,20 @@ public class GameServer implements Runnable, Constants {
 
         // Start the game thread
         t.start();
+    }
+    
+
+
+    public void pauseGame() {
+        paused = true;
+        // Notify clients that the game is paused
+        broadcast("PAUSE");
+    }
+
+    public void resumeGame() {
+        paused = false;
+        // Notify clients that the game is resumed
+        broadcast("RESUME");
     }
 
     public void broadcast(String msg) {
@@ -131,6 +147,16 @@ public class GameServer implements Runnable, Constants {
 
                         // Send to all the updated game state
                         broadcast(playerData);
+                    }if (playerData.startsWith("PAUSE")) {
+                        // Pause the game
+                        pauseGame();
+                        // Broadcast pause message to all clients
+                        broadcast("PAUSE");
+                    } else if (playerData.startsWith("RESUME")) {
+                        // Resume the game
+                        resumeGame();
+                        // Broadcast resume message to all clients
+                        broadcast("RESUME");
                     }
                     // if (playerData.startsWith("ENEMY")) {
                     // System.out.println(playerData);
