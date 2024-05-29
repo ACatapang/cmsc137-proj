@@ -17,12 +17,12 @@ public class GameServer implements Runnable, Constants {
     int numPlayers;
     Thread t = new Thread(this);
     private TextPanel serverPanel;
-    // int[] enemyState = {
-    // 0, 0, 0, 0, 0, 0, 0, 0,
-    // 0, 0, 0, 0, 0, 0, 0, 0,
-    // 0, 0, 0, 0, 0, 0, 0, 0,
-    // 0, 0, 0, 0, 0, 0, 0, 0,
-    // 0, 0, 0, 0, 0, 0, 0, 0 };
+    int[] enemyState = {
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0 };
     String bombRandomizer = "BOMB" +
             " 0 0 0 0 0 0 0 0" +
             " 0 0 0 0 0 0 0 0" +
@@ -87,10 +87,11 @@ public class GameServer implements Runnable, Constants {
                 case WAITING_FOR_PLAYERS:
                     if (playerData.startsWith("CONNECT")) {
                         String tokens[] = playerData.split(" ");
-                        NetPlayer player = new NetPlayer(tokens[1], packet.getAddress(), packet.getPort());
+                        playerCount++;
+                        NetPlayer player = new NetPlayer(tokens[1], packet.getAddress(), packet.getPort(),
+                                playerCount);
                         game.update(tokens[1].trim(), player);
                         broadcast("CONNECTED " + tokens[1]);
-                        playerCount++;
                         String message = "Player connected: " + tokens[1];
                         String lobbyCount = "Players: " + playerCount + "/" + numPlayers;
                         System.out.println(message);
@@ -141,14 +142,14 @@ public class GameServer implements Runnable, Constants {
                     if (playerData.startsWith("BULLET")) {
                         // Tokenize:
                         // The format: PLAYER <player name> <x> <y>
-                        System.out.println(playerData);
+                        // System.out.println(playerData);
                         // Update the game state
 
                         // Send to all the updated game state
                         broadcast(playerData);
                     }
                     // if (playerData.startsWith("ENEMY")) {
-                    // System.out.println(playerData);
+                    // // System.out.println(playerData);
                     // String[] enemyInfo = playerData.split(" ", 2);
                     // String[] enemyStateString = enemyInfo[1].split(" ");
                     // int[] playerEnemyState = new int[enemyStateString.length];

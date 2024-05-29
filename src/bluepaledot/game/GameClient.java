@@ -130,9 +130,10 @@ public class GameClient extends JPanel implements Runnable, Constants {
                         int x = Integer.parseInt(playerInfo[2]);
                         int y = Integer.parseInt(playerInfo[3]);
                         boolean dying = Boolean.parseBoolean(playerInfo[4]);
+                        int id = Integer.parseInt(playerInfo[5]);
                         // player.setX(x);
                         // player.setY(y);
-                        updatePlayerPosition(pname, x, y, dying);
+                        updatePlayerPosition(pname, x, y, dying, id);
 
                     }
                     // show the changes
@@ -150,7 +151,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 }
 
                 if (serverData.startsWith("BULLET")) {
-                    System.out.println(serverData);
+                    // System.out.println(serverData);
                     String[] bulletInfo = serverData.split(" ");
                     int x = Integer.parseInt(bulletInfo[1]);
                     int y = Integer.parseInt(bulletInfo[2]);
@@ -160,7 +161,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 }
 
                 // if (serverData.startsWith("ENEMY")) {
-                // System.out.println(serverData);
+                // // System.out.println(serverData);
                 // String[] enemyState = serverData.split(" ");
                 // String[] enemyStateString = enemyState[1].split(" ");
                 // int i = 0;
@@ -184,7 +185,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
         }
     }
 
-    private void updatePlayerPosition(String pname, int x, int y, boolean dying) {
+    private void updatePlayerPosition(String pname, int x, int y, boolean dying, int id) {
         // Find the player with pname in the list of players
         for (Player player : players) {
             if (player.getName().equals(pname)) {
@@ -194,11 +195,13 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 if (!player.getName().equals(name)) {
                     player.setDying(dying);
                 }
+                player.setSprite(id);
                 return;
             }
         }
         // If player not found, create a new player object and add it to the list
         Player newPlayer = new Player(pname);
+        newPlayer.setSprite(id);
         players.add(newPlayer);
     }
 
@@ -552,7 +555,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 boolean state = player.isDying();
 
                 send("PLAYER " + name + " " + x + " " + y + " " + state);
-                System.out.println("Player " + name + " " + x + " " + y + " " + state);
+                // System.out.println("Player " + name + " " + x + " " + y + " " + state);
 
                 int key = e.getKeyCode();
 

@@ -65,4 +65,12 @@ public class Player extends Sprite {
             dx = 0;
         }
     }
+
+    public void setSprite(int id) {
+        var playerImg = "src/images/ship" + String.valueOf((id) % 4 + 1) + ".png";
+        var ii = new ImageIcon(playerImg);
+
+        width = ii.getImage().getWidth(null);
+        setImage(ii.getImage());
+    }
 }

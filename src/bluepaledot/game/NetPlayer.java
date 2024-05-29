@@ -9,12 +9,14 @@ public class NetPlayer {
     private final String name;
     private int x, y;
     private boolean dying = false;
+    private final int id;
 
-    public NetPlayer(String name, InetAddress address, int port) {
+    public NetPlayer(String name, InetAddress address, int port, int id) {
         this.address = address;
         this.port = port;
         this.name = name;
         this.y = 430;
+        this.id = id;
     }
 
     public InetAddress getAddress() {
@@ -53,6 +55,10 @@ public class NetPlayer {
         this.dying = dying;
     }
 
+    public int getId() {
+        return id;
+    }
+
     /**
      * String representation. used for transfer over the network
      */
@@ -62,7 +68,8 @@ public class NetPlayer {
         retval += name + " ";
         retval += x + " ";
         retval += y + " ";
-        retval += dying;
+        retval += dying + " ";
+        retval += id;
         return retval;
     }
 }
