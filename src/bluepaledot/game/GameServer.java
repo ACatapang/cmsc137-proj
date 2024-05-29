@@ -137,14 +137,6 @@ public class GameServer implements Runnable, Constants {
                         game.updatePlayer(pname, player);
                         // Send to all the updated game state
                         broadcast(game.toString());
-                    } else if (playerData.startsWith("BULLET")) {
-                        String[] bulletInfo = playerData.split(" ");
-                        String pname = bulletInfo[1];
-                        int x = Integer.parseInt(bulletInfo[2].trim());
-                        int y = Integer.parseInt(bulletInfo[3].trim());
-                        Bullet bullet = new Bullet(x, y);
-                        game.updateBullet(pname, bullet);
-                        broadcast(game.toString());
                     }
                     break;
             }
