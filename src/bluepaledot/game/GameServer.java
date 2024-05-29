@@ -78,6 +78,7 @@ public class GameServer implements Runnable, Constants {
                         game.update(tokens[1].trim(), player);
                         broadcast("CONNECTED " + tokens[1]);
                         playerCount++;
+                        System.out.println("Players: " + playerCount+"/"+numPlayers);
                         if (playerCount == numPlayers) {
                             gameStage = GAME_START;
                         }

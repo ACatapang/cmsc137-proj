@@ -38,6 +38,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
     private int deaths = 0;
 
     private boolean inGame = true;
+    private boolean gameStart = false;
     private String explImg = "src/images/explosion.png";
     private String message = "Game Over";
     ChatPanel chatPanel;
@@ -57,7 +58,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
         socket.setSoTimeout(100);
 
-        //create the buffer
+        // create the buffer
         // offscreen = (BufferedImage) this.createImage(BOARD_WIDTH, BOARD_HEIGHT);
         initBoard();
 
@@ -86,21 +87,21 @@ public class GameClient extends JPanel implements Runnable, Constants {
             } catch (Exception ioe) {
             }
 
-            //Get the data from players
+            // Get the data from players
             byte[] buf = new byte[256];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             try {
                 socket.receive(packet);
-            } catch (Exception ioe) {/*lazy exception handling :)*/
+            } catch (Exception ioe) {/* lazy exception handling :) */
             }
 
             serverData = new String(buf);
             serverData = serverData.trim();
 
-            //if (!serverData.equals("")){
-            //	System.out.println("Server Data:" +serverData);
-            //}
-            //Study the following kids. 
+            // if (!serverData.equals("")){
+            // System.out.println("Server Data:" +serverData);
+            // }
+            // Study the following kids.
             if (!connected && serverData.startsWith("CONNECTED")) {
                 connected = true;
                 System.out.println("Connected.");
@@ -108,6 +109,10 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 System.out.println("Connecting..");
                 send("CONNECT " + name);
             } else if (connected) {
+                if (serverData.startsWith("START")) {
+                    gameStart = true;
+                    System.out.println("Game started.");
+                }
 
                 if (serverData.startsWith("PLAYER")) {
                     // System.out.println(serverData);
@@ -122,7 +127,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
                         updatePlayerPosition(pname, x, y);
 
                     }
-                    //show the changes
+                    // show the changes
                     repaint();
                 }
 
@@ -187,7 +192,9 @@ public class GameClient extends JPanel implements Runnable, Constants {
         timer = new Timer(Constants.DELAY, new GameCycle());
         timer.start();
 
+        // if (gameStart) {
         gameInit();
+        // }
     }
 
     private void gameInit() {
@@ -361,93 +368,95 @@ public class GameClient extends JPanel implements Runnable, Constants {
         }
 
         // enemies
-        for (Enemy enemy : enemies) {
+        if (gameStart) {
+            for (Enemy enemy : enemies) {
 
-            int x = enemy.getX();
+                int x = enemy.getX();
 
-            if (x >= Constants.BOARD_WIDTH - Constants.BORDER_RIGHT && direction != -1) {
+                if (x >= Constants.BOARD_WIDTH - Constants.BORDER_RIGHT && direction != -1) {
 
-                direction = -1;
+                    direction = -1;
 
-                for (Enemy a2 : enemies) {
-                    a2.setY(a2.getY() + Constants.GO_DOWN);
+                    for (Enemy a2 : enemies) {
+                        a2.setY(a2.getY() + Constants.GO_DOWN);
+                    }
+                }
+
+                if (x <= Constants.BORDER_LEFT && direction != 1) {
+
+                    direction = 1;
+
+                    Iterator<Enemy> i2 = enemies.iterator();
+
+                    while (i2.hasNext()) {
+
+                        Enemy a = i2.next();
+                        a.setY(a.getY() + Constants.GO_DOWN);
+                    }
                 }
             }
 
-            if (x <= Constants.BORDER_LEFT && direction != 1) {
+            Iterator<Enemy> it = enemies.iterator();
 
-                direction = 1;
+            while (it.hasNext()) {
 
-                Iterator<Enemy> i2 = enemies.iterator();
+                Enemy enemy = it.next();
 
-                while (i2.hasNext()) {
+                if (enemy.isVisible()) {
 
-                    Enemy a = i2.next();
-                    a.setY(a.getY() + Constants.GO_DOWN);
-                }
-            }
-        }
+                    int y = enemy.getY();
 
-        Iterator<Enemy> it = enemies.iterator();
+                    if (y > Constants.GROUND - Constants.ENEMY_HEIGHT) {
+                        inGame = false;
+                        message = "Invasion!";
+                    }
 
-        while (it.hasNext()) {
-
-            Enemy enemy = it.next();
-
-            if (enemy.isVisible()) {
-
-                int y = enemy.getY();
-
-                if (y > Constants.GROUND - Constants.ENEMY_HEIGHT) {
-                    inGame = false;
-                    message = "Invasion!";
-                }
-
-                enemy.act(direction);
-            }
-        }
-
-        // bombs
-        var generator = new Random();
-
-        for (Enemy enemy : enemies) {
-
-            int shot = generator.nextInt(15);
-            Enemy.Bomb bomb = enemy.getBomb();
-
-            if (shot == Constants.CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
-
-                bomb.setDestroyed(false);
-                bomb.setX(enemy.getX());
-                bomb.setY(enemy.getY());
-            }
-
-            int bombX = bomb.getX();
-            int bombY = bomb.getY();
-            int playerX = player.getX();
-            int playerY = player.getY();
-
-            if (player.isVisible() && !bomb.isDestroyed()) {
-
-                if (bombX >= (playerX)
-                        && bombX <= (playerX + Constants.PLAYER_WIDTH)
-                        && bombY >= (playerY)
-                        && bombY <= (playerY + Constants.PLAYER_HEIGHT)) {
-
-                    var ii = new ImageIcon(explImg);
-                    player.setImage(ii.getImage());
-                    player.setDying(true);
-                    bomb.setDestroyed(true);
+                    enemy.act(direction);
                 }
             }
 
-            if (!bomb.isDestroyed()) {
+            // bombs
+            var generator = new Random();
 
-                bomb.setY(bomb.getY() + 1);
+            for (Enemy enemy : enemies) {
 
-                if (bomb.getY() >= Constants.GROUND - Constants.BOMB_HEIGHT) {
+                int shot = generator.nextInt(15);
+                Enemy.Bomb bomb = enemy.getBomb();
 
-                    bomb.setDestroyed(true);
+                if (shot == Constants.CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
+
+                    bomb.setDestroyed(false);
+                    bomb.setX(enemy.getX());
+                    bomb.setY(enemy.getY());
+                }
+
+                int bombX = bomb.getX();
+                int bombY = bomb.getY();
+                int playerX = player.getX();
+                int playerY = player.getY();
+
+                if (player.isVisible() && !bomb.isDestroyed()) {
+
+                    if (bombX >= (playerX)
+                            && bombX <= (playerX + Constants.PLAYER_WIDTH)
+                            && bombY >= (playerY)
+                            && bombY <= (playerY + Constants.PLAYER_HEIGHT)) {
+
+                        var ii = new ImageIcon(explImg);
+                        player.setImage(ii.getImage());
+                        player.setDying(true);
+                        bomb.setDestroyed(true);
+                    }
+                }
+
+                if (!bomb.isDestroyed()) {
+
+                    bomb.setY(bomb.getY() + 1);
+
+                    if (bomb.getY() >= Constants.GROUND - Constants.BOMB_HEIGHT) {
+
+                        bomb.setDestroyed(true);
+                    }
                 }
             }
         }
@@ -491,7 +500,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
                 if (key == KeyEvent.VK_SPACE) {
                     if (inGame) {
-                        if (!bullet.isVisible()&&player.isVisible()) {
+                        if (!bullet.isVisible() && player.isVisible()) {
                             bullet = new Bullet(x, y);
                         }
                     }
