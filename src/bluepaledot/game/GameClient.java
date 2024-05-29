@@ -52,6 +52,12 @@ public class GameClient extends JPanel implements Runnable, Constants {
     boolean connected = false;
     DatagramSocket socket = new DatagramSocket();
     String serverData;
+    int[] bombRandomizer = {
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0 };
 
     public GameClient(String server, String name) throws Exception {
         this.server = server;
@@ -156,12 +162,24 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 // if (serverData.startsWith("ENEMY")) {
                 // System.out.println(serverData);
                 // String[] enemyState = serverData.split(" ");
-                // int x = Integer.parseInt(bulletInfo[1]);
-                // int y = Integer.parseInt(bulletInfo[2]);
-                // bullet = new Bullet(x, y);
-
+                // String[] enemyStateString = enemyState[1].split(" ");
+                // int i = 0;
+                // for (Enemy enemy : enemies) {
+                // enemy.setDying(Integer.parseInt(enemyStateString[i]) > 0 ? true : false);
+                // i++;
+                // }
                 // repaint();
                 // }
+
+                if (serverData.startsWith("BOMB")) {
+                    // System.out.println(serverData);
+                    String[] bomb = serverData.split(" ", 2);
+                    String[] enemyStateString = bomb[1].split(" ");
+                    for (int i = 0; i < bombRandomizer.length; i++) {
+                        bombRandomizer[i] = (Integer.parseInt(enemyStateString[i]));
+                        i++;
+                    }
+                }
             }
         }
     }
@@ -363,7 +381,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
             int bulletX = bullet.getX();
             int bulletY = bullet.getY();
-
+            // String outEnemyState = "ENEMY ";
             for (Enemy enemy : enemies) {
 
                 int alienX = enemy.getX();
@@ -378,11 +396,18 @@ public class GameClient extends JPanel implements Runnable, Constants {
                         var ii = new ImageIcon(explImg);
                         enemy.setImage(ii.getImage());
                         enemy.setDying(true);
+                        // outEnemyState += "1 ";
                         deaths++;
                         bullet.die();
+                    } else {
+                        // outEnemyState += "0 ";
                     }
+                } else {
+                    // outEnemyState += "0 ";
                 }
+
             }
+            // send(outEnemyState);
 
             int y = bullet.getY();
             y -= 4;
@@ -443,11 +468,12 @@ public class GameClient extends JPanel implements Runnable, Constants {
             }
 
             // bombs
-            var generator = new Random();
-
+            // var generator = new Random();
+            int i = 0;
+            send("BOMB create");
             for (Enemy enemy : enemies) {
 
-                int shot = generator.nextInt(15);
+                int shot = bombRandomizer[i];
                 Enemy.Bomb bomb = enemy.getBomb();
 
                 if (shot == Constants.CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
@@ -487,6 +513,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
                         bomb.setDestroyed(true);
                     }
                 }
+                i++;
             }
         }
     }

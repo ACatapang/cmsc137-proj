@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Iterator;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 public class GameServer implements Runnable, Constants {
 
@@ -15,6 +17,18 @@ public class GameServer implements Runnable, Constants {
     int numPlayers;
     Thread t = new Thread(this);
     private TextPanel serverPanel;
+    // int[] enemyState = {
+    // 0, 0, 0, 0, 0, 0, 0, 0,
+    // 0, 0, 0, 0, 0, 0, 0, 0,
+    // 0, 0, 0, 0, 0, 0, 0, 0,
+    // 0, 0, 0, 0, 0, 0, 0, 0,
+    // 0, 0, 0, 0, 0, 0, 0, 0 };
+    String bombRandomizer = "BOMB" +
+            " 0 0 0 0 0 0 0 0" +
+            " 0 0 0 0 0 0 0 0" +
+            " 0 0 0 0 0 0 0 0" +
+            " 0 0 0 0 0 0 0 0" +
+            " 0 0 0 0 0 0 0 0";
 
     public GameServer(int numPlayers, TextPanel serverPanel) {
         this.numPlayers = numPlayers;
@@ -58,6 +72,7 @@ public class GameServer implements Runnable, Constants {
     }
 
     public void run() {
+        int counter = 0;
         while (true) {
             byte[] buf = new byte[256];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -134,10 +149,41 @@ public class GameServer implements Runnable, Constants {
                     }
                     // if (playerData.startsWith("ENEMY")) {
                     // System.out.println(playerData);
-                    // broadcast(playerData);
+                    // String[] enemyInfo = playerData.split(" ", 2);
+                    // String[] enemyStateString = enemyInfo[1].split(" ");
+                    // int[] playerEnemyState = new int[enemyStateString.length];
+                    // for (int i = 0; i < enemyState.length; i++) {
+                    // playerEnemyState[i] = Integer.parseInt(enemyStateString[i]);
                     // }
+                    // broadcast("ENEMY " + enemyStateSum(playerEnemyState, enemyState).toString());
+                    // }
+                    if (playerData.startsWith("BOMB")) {
+                        // System.out.println(bombRandomizer);
+                        broadcast(bombRandomizer);
+                    }
+                    if (counter == 400) {
+                        randomize();
+                        counter = 0;
+                    } else {
+                        counter++;
+                    }
                     break;
             }
+        }
+    }
+
+    // public static int[] enemyStateSum(int[] array1, int[] array2) {
+    // return IntStream.range(0, array1.length)
+    // .map(i -> array1[i] + array2[i])
+    // .toArray();
+    // }
+
+    private void randomize() {
+        var generator = new Random();
+        bombRandomizer = "BOMB";
+        for (int i = 0, n = 40; i < n; i++) {
+            int x = generator.nextInt(15);
+            bombRandomizer += " " + x;
         }
     }
 }
