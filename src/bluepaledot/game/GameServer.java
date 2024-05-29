@@ -27,14 +27,14 @@ public class GameServer implements Runnable, Constants {
             System.exit(-1);
         } catch (Exception e) {
         }
-        //Create the game state
+        // Create the game state
         game = new GameState();
 
         System.out.println("Game created...");
         serverPanel.log("Game Server started, waiting for players...");
         System.out.println("Waiting for Players...");
 
-        //Start the game thread
+        // Start the game thread
         t.start();
     }
 
@@ -73,12 +73,16 @@ public class GameServer implements Runnable, Constants {
                     if (playerData.startsWith("CONNECT")) {
                         String tokens[] = playerData.split(" ");
                         NetPlayer player = new NetPlayer(tokens[1], packet.getAddress(), packet.getPort());
-                        System.out.println("Player connected: " + tokens[1]);
-                        serverPanel.log("Player connected: " + tokens[1]);
                         game.update(tokens[1].trim(), player);
                         broadcast("CONNECTED " + tokens[1]);
                         playerCount++;
-                        System.out.println("Players: " + playerCount+"/"+numPlayers);
+                        String message = "Player connected: " + tokens[1];
+                        String lobbyCount = "Players: " + playerCount + "/" + numPlayers;
+                        System.out.println(message);
+                        serverPanel.log(message);
+                        broadcast("CHAT Server: " + message);
+                        broadcast("CHAT Server: " + lobbyCount);
+                        System.out.println(lobbyCount);
                         if (playerCount == numPlayers) {
                             gameStage = GAME_START;
                         }
@@ -88,10 +92,11 @@ public class GameServer implements Runnable, Constants {
                     System.out.println("Game Started");
                     serverPanel.log("Game started");
                     broadcast("START");
+                    broadcast("CHAT Server: Game start!!");
                     gameStage = IN_PROGRESS;
                     break;
                 case IN_PROGRESS:
-                    //Player data was received!
+                    // Player data was received!
                     if (playerData.startsWith("CHAT")) {
                         // Tokenize chat message
                         String[] tokens = playerData.split(" ", 2);
@@ -100,21 +105,37 @@ public class GameServer implements Runnable, Constants {
                         broadcast("CHAT " + message);
                     }
                     if (playerData.startsWith("PLAYER")) {
-                        //Tokenize:
-                        //The format: PLAYER <player name> <x> <y>
+                        // Tokenize:
+                        // The format: PLAYER <player name> <x> <y>
                         String[] playerInfo = playerData.split(" ");
+                        // System.out.println(playerData);
                         String pname = playerInfo[1];
                         int x = Integer.parseInt(playerInfo[2].trim());
                         int y = Integer.parseInt(playerInfo[3].trim());
-                        //Get the player from the game state
+                        boolean state = Boolean.parseBoolean(playerInfo[4].trim());
+                        // Get the player from the game state
                         NetPlayer player = (NetPlayer) game.getPlayers().get(pname);
                         player.setX(x);
                         player.setY(y);
-                        //Update the game state
+                        player.setDying(state);
+                        // Update the game state
                         game.update(pname, player);
-                        //Send to all the updated game state
+                        // Send to all the updated game state
                         broadcast(game.toString());
                     }
+                    if (playerData.startsWith("BULLET")) {
+                        // Tokenize:
+                        // The format: PLAYER <player name> <x> <y>
+                        System.out.println(playerData);
+                        // Update the game state
+
+                        // Send to all the updated game state
+                        broadcast(playerData);
+                    }
+                    // if (playerData.startsWith("ENEMY")) {
+                    // System.out.println(playerData);
+                    // broadcast(playerData);
+                    // }
                     break;
             }
         }

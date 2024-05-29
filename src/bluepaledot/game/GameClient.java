@@ -33,6 +33,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
     private List<Player> players; // List of players
     private Player player;
     private Bullet bullet;
+    private List<Bullet> bullets;
 
     private int direction = -1;
     private int deaths = 0;
@@ -122,9 +123,10 @@ public class GameClient extends JPanel implements Runnable, Constants {
                         String pname = playerInfo[1];
                         int x = Integer.parseInt(playerInfo[2]);
                         int y = Integer.parseInt(playerInfo[3]);
+                        boolean dying = Boolean.parseBoolean(playerInfo[4]);
                         // player.setX(x);
                         // player.setY(y);
-                        updatePlayerPosition(pname, x, y);
+                        updatePlayerPosition(pname, x, y, dying);
 
                     }
                     // show the changes
@@ -140,17 +142,40 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
                     repaint();
                 }
+
+                if (serverData.startsWith("BULLET")) {
+                    System.out.println(serverData);
+                    String[] bulletInfo = serverData.split(" ");
+                    int x = Integer.parseInt(bulletInfo[1]);
+                    int y = Integer.parseInt(bulletInfo[2]);
+                    bullet = new Bullet(x, y);
+
+                    repaint();
+                }
+
+                // if (serverData.startsWith("ENEMY")) {
+                // System.out.println(serverData);
+                // String[] enemyState = serverData.split(" ");
+                // int x = Integer.parseInt(bulletInfo[1]);
+                // int y = Integer.parseInt(bulletInfo[2]);
+                // bullet = new Bullet(x, y);
+
+                // repaint();
+                // }
             }
         }
     }
 
-    private void updatePlayerPosition(String pname, int x, int y) {
+    private void updatePlayerPosition(String pname, int x, int y, boolean dying) {
         // Find the player with pname in the list of players
         for (Player player : players) {
             if (player.getName().equals(pname)) {
                 // Update the player's position
                 player.setX(x);
                 player.setY(y);
+                if (!player.getName().equals(name)) {
+                    player.setDying(dying);
+                }
                 return;
             }
         }
@@ -201,6 +226,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
         players = new ArrayList<>();
         enemies = new ArrayList<>();
+        bullets = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 8; j++) {
@@ -214,6 +240,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
         player = new Player(name);
         players.add(player);
         bullet = new Bullet();
+        bullets.add(bullet);
     }
 
     private void drawEnemies(Graphics g) {
@@ -233,7 +260,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
     }
 
     private void drawPlayer(Graphics g, Player player) {
-        if (player.isVisible()) {
+        if (player.isVisible() && !player.isDying()) {
             g.drawImage(player.getImage(), player.getX(), player.getY(), this);
         }
     }
@@ -329,7 +356,7 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
         // player
         player.act();
-        send("PLAYER " + name + " " + player.getX() + " " + player.getY());
+        send("PLAYER " + name + " " + player.getX() + " " + player.getY() + " " + player.isDying());
 
         // bullet
         if (bullet.isVisible()) {
@@ -445,7 +472,9 @@ public class GameClient extends JPanel implements Runnable, Constants {
                         var ii = new ImageIcon(explImg);
                         player.setImage(ii.getImage());
                         player.setDying(true);
+                        System.out.println("Player hit!");
                         bomb.setDestroyed(true);
+
                     }
                 }
 
@@ -493,15 +522,18 @@ public class GameClient extends JPanel implements Runnable, Constants {
 
                 int x = player.getX();
                 int y = player.getY();
+                boolean state = player.isDying();
 
-                send("PLAYER " + name + " " + x + " " + y);
+                send("PLAYER " + name + " " + x + " " + y + " " + state);
+                System.out.println("Player " + name + " " + x + " " + y + " " + state);
 
                 int key = e.getKeyCode();
 
                 if (key == KeyEvent.VK_SPACE) {
-                    if (inGame) {
-                        if (!bullet.isVisible() && player.isVisible()) {
+                    if (inGame && gameStart) {
+                        if (!bullet.isVisible() && !player.isDying()) {
                             bullet = new Bullet(x, y);
+                            send("BULLET" + " " + x + " " + y);
                         }
                     }
 
