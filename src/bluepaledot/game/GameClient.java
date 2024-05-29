@@ -85,22 +85,16 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 Thread.sleep(1);
             } catch (Exception ioe) {
             }
-
-            //Get the data from players
+    
+            // Get the data from players
             byte[] buf = new byte[256];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             try {
                 socket.receive(packet);
-            } catch (Exception ioe) {/*lazy exception handling :)*/
-            }
-
-            serverData = new String(buf);
-            serverData = serverData.trim();
-
-            //if (!serverData.equals("")){
-            //	System.out.println("Server Data:" +serverData);
-            //}
-            //Study the following kids. 
+            } catch (Exception ioe) { /* lazy exception handling :) */ }
+    
+            serverData = new String(buf).trim();
+    
             if (!connected && serverData.startsWith("CONNECTED")) {
                 connected = true;
                 System.out.println("Connected.");
@@ -108,7 +102,6 @@ public class GameClient extends JPanel implements Runnable, Constants {
                 System.out.println("Connecting..");
                 send("CONNECT " + name);
             } else if (connected) {
-
                 if (serverData.startsWith("PLAYER")) {
                     String[] playersInfo = serverData.split(":");
                     for (int i = 0; i < playersInfo.length; i++) {
@@ -116,25 +109,39 @@ public class GameClient extends JPanel implements Runnable, Constants {
                         String pname = playerInfo[1];
                         int x = Integer.parseInt(playerInfo[2]);
                         int y = Integer.parseInt(playerInfo[3]);
-                        // player.setX(x);
-                        // player.setY(y);
                         updatePlayerPosition(pname, x, y);
 
+                        if (i == playerInfo.length){
+                            x = Integer.parseInt(playerInfo[2]);
+                            y = Integer.parseInt(playerInfo[3]);
+                            updatePlayerPosition(pname, x, y);
+                        }
                     }
-                    //show the changes
                     repaint();
-                }
-
-                if (serverData.startsWith("CHAT")) {
-                    // Tokenize chat message
+                } else if (serverData.startsWith("GAMESTATE")) {
+                    String gameState = serverData.substring(10); // Remove "GAMESTATE "
+                    updateGameState(gameState);
+                    repaint();
+                } else if (serverData.startsWith("CHAT")) {
                     String[] tokens = serverData.split(" ", 2);
                     String message = tokens[1];
-                    // Display chat message in chat panel
                     chatPanel.addMessage(message);
-
                     repaint();
                 }
             }
+        }
+    }
+
+    private void updateGameState(String gameState) {
+        System.out.println(gameState);
+        String[] playersInfo = gameState.split(":");
+        for (String playerInfo : playersInfo) {
+            String[] details = playerInfo.split(" ");
+            String playerName = details[0];
+            System.out.println(playerName);
+            int x = Integer.parseInt(details[1]);
+            int y = Integer.parseInt(details[2]);
+            updatePlayerPosition(playerName, x, y);
         }
     }
 
@@ -190,23 +197,21 @@ public class GameClient extends JPanel implements Runnable, Constants {
     }
 
     private void gameInit() {
-
         players = new ArrayList<>();
         enemies = new ArrayList<>();
-
+    
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 8; j++) {
-
-                var enemy = new Enemy(Constants.ENEMY_INIT_X + 30 * j,
-                        Constants.ENEMY_INIT_Y + 25 * i);
+                var enemy = new Enemy(Constants.ENEMY_INIT_X + 30 * j, Constants.ENEMY_INIT_Y + 25 * i);
                 enemies.add(enemy);
             }
         }
-
+    
         player = new Player(name);
         players.add(player);
         bullet = new Bullet();
     }
+    
 
     private void drawEnemies(Graphics g) {
 
@@ -476,28 +481,34 @@ public class GameClient extends JPanel implements Runnable, Constants {
             }
         }
 
+        // Inside the keyPressed method of the TAdapter class in the GameClient class
+
         @Override
-        public void keyPressed(KeyEvent e) {
-            if (e.getComponent() instanceof JPanel) {
-                player.keyPressed(e);
+public void keyPressed(KeyEvent e) {
+    if (e.getComponent() instanceof JPanel) {
+        player.keyPressed(e);
 
-                int x = player.getX();
-                int y = player.getY();
+        int x = player.getX();
+        int y = player.getY();
 
-                send("PLAYER " + name + " " + x + " " + y);
+        // Update the player's name
+        String playerName = player.getName();
 
-                int key = e.getKeyCode();
+        // Send player movement update to the server
+        send("PLAYER " + playerName + " " + x + " " + y); // Send the correct player's name
 
-                if (key == KeyEvent.VK_SPACE) {
-                    if (inGame) {
-                        if (!bullet.isVisible()) {
-                            bullet = new Bullet(x, y);
-                        }
-                    }
+        int key = e.getKeyCode();
 
+        if (key == KeyEvent.VK_SPACE) {
+            if (inGame) {
+                if (!bullet.isVisible()) {
+                    bullet = new Bullet(x, y);
                 }
             }
-
         }
+    }
+}
+
+
     }
 }
